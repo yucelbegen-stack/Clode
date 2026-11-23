@@ -3,7 +3,7 @@
 async function gptLoad() {
   await window.ready3;
   const L = [];
-  for (const n of ['g_goat', 'g_hen_brown', 'g_hen_white', 'g_hen_black', 'g_factory_in', 'g_factory_yard', 'g_mountain_road', 'g_plateau', 'g_village_road', 'g_mud', 'g_climb', 'g_mud_rain', 'g_bayram']) L.push(loadImg(n, `../assets/sprites/${n}.png`));
+  for (const n of ['g_goat', 'g_hen_brown', 'g_hen_white', 'g_hen_black', 'g_factory_in', 'g_factory_yard', 'g_mountain_road', 'g_plateau', 'g_village_road', 'g_mud', 'g_climb', 'g_mud_rain', 'g_bayram', 'g_town', 'g_galata', 'g_house']) L.push(loadImg(n, `../assets/sprites/${n}.png`));
   await Promise.all(L);
   return true;
 }
@@ -149,5 +149,48 @@ K.k10 = (g, t) => {
   goat(g, 770, 1318, 160, { t, bleat: Math.max(0, Math.sin(clamp((lt - 1.0) / 0.9, 0, 1) * Math.PI)), dir: -1 });
   kCaptions(g, t, 1800);
   return d;
+};
+
+// K13 42.5–45.5 village house (GPT) – white Toros parked in the yard, starts up
+K.k13 = (g, t) => {
+  const lt = t - 42.5;
+  bgPan(g, IMG.g_house, lt, 0.006);
+  const im = IMG.front, wpx = 640, s = wpx / im.width, h = im.height * s, gy = 1760, x = 560;
+  const start = lt > 2.3, shake = start ? Math.sin(lt * 70) * 2 * Math.exp(-(lt - 2.3) * 3) : 0;
+  g.drawImage(im, x - wpx / 2 + shake, gy - h, wpx, h);
+  if (start) for (const hx of [-0.36, -0.24, 0.24, 0.36]) { const gl = g.createRadialGradient(x + hx * wpx, gy - h * 0.43, 0, x + hx * wpx, gy - h * 0.43, 80); gl.addColorStop(0, 'rgba(255,250,215,0.9)'); gl.addColorStop(1, 'rgba(255,250,215,0)'); g.fillStyle = gl; g.beginPath(); g.arc(x + hx * wpx, gy - h * 0.43, 80, 0, 7); g.fill(); }
+  if (start) txt(g, 'VINNN!', 860, 1180, { size: 70, font: 'IBlackI', fill: '#ffd84a', stroke: '#111', sw: 12, alpha: seg(lt, 2.3, 2.5), rot: -0.1 });
+  if (lt > 1.0 && lt < 2.2) txt(g, 'TIK TIK', 870, 1420, { size: 50, font: 'IBlackI', fill: '#fff', stroke: '#111', sw: 10, alpha: Math.sin(lt * 9) > 0 ? 1 : 0.45, rot: -0.1 });
+  kCaptions(g, t, 1850);
+};
+// K14 45.5–48.5 Galata (GPT) – yellow taxi A -> B on the seaside road
+K.k14 = (g, t) => {
+  const lt = t - 45.5, ppm = 150, d = MK14.pos(lt);
+  bgPan(g, IMG.g_galata, lt, 0.004);
+  drawCar(g, { kind: 'sedan', color: 'taxi', x: -460 + d * ppm, gy: 1478, ppm, dist: d, v: 3.4, t });
+  kCaptions(g, t, 1700);
+  return d;
+};
+// K15 48.5–51 town street (GPT) – police Toros A -> B, light bar flashing
+K.k15 = (g, t) => {
+  const lt = t - 48.5, ppm = 150, d = MK15.pos(lt);
+  bgPan(g, IMG.g_town, lt, 0.004);
+  drawCar(g, { kind: 'station', color: 'police', x: -460 + d * ppm, gy: 1482, ppm, dist: d, v: 3.2, t });
+  const ph = Math.floor(t * 6) % 2; g.fillStyle = ph ? 'rgba(40,90,255,0.07)' : 'rgba(255,40,40,0.07)'; g.fillRect(0, 0, W, H);
+  kCaptions(g, t, 1700);
+  return d;
+};
+// K16 51–54.5 town street (GPT) – two-way traffic, all colours + taxis
+K.k16 = (g, t) => {
+  const lt = t - 51;
+  bgPan(g, IMG.g_town, lt, 0.004);
+  const ppmB = 112, vB = 3.0;
+  TRAFFIC_L.forEach(([k, c, off]) => { const d = (lt + off) * vB, xr = -1820 + d * ppmB; if (xr < -500 || xr > W + 500) return;
+    g.save(); g.translate(W, 0); g.scale(-1, 1); drawCar(g, { kind: k, color: c, x: xr, gy: 1372, ppm: ppmB, dist: d, v: vB, t, noExhaust: true }); g.restore(); });
+  const ppmF = 140, vF = 3.2;
+  TRAFFIC_R.forEach(([k, c, off]) => { const xx = -2180 + ((lt + off) * vF) * ppmF; if (xx < -500 || xx > W + 500) return;
+    drawCar(g, { kind: k, color: c, x: xx, gy: 1488, ppm: ppmF, dist: (lt + off) * vF, v: vF, t }); });
+  bigWord(g, 'HALKIN ARABASI', t, 51.15, 54.5, 400, { size: 120, sw: 20 });
+  kCaptions(g, t, 1700);
 };
 window.ready6 = gptLoad();
