@@ -1020,7 +1020,7 @@ function kRender(t) {
     finish(g, t, 0.38);
     g.restore(); return;
   }
-  window.__PHOTO_SCENE = ['k1', 'k2', 'k4', 'k6', 'k8', 'k11', 'k12', 'k17'].includes(sc[2]);
+  window.__PHOTO_SCENE = ['k1', 'k2', 'k4', 'k6', 'k7', 'k8', 'k10', 'k11', 'k12', 'k17'].includes(sc[2]);
   dist = K[sc[2]](g, t) || 0;
   const odoA = ROAD.has(sc[2]) ? clamp(Math.min(t - sc[0], sc[1] - t) / 0.2, 0, 1) : 0;
   odometer(g, t, dist, odoA);

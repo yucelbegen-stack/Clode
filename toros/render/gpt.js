@@ -3,7 +3,7 @@
 async function gptLoad() {
   await window.ready3;
   const L = [];
-  for (const n of ['g_goat', 'g_hen_brown', 'g_hen_white', 'g_hen_black', 'g_factory_in', 'g_factory_yard', 'g_mountain_road', 'g_plateau', 'g_village_road', 'g_mud']) L.push(loadImg(n, `../assets/sprites/${n}.png`));
+  for (const n of ['g_goat', 'g_hen_brown', 'g_hen_white', 'g_hen_black', 'g_factory_in', 'g_factory_yard', 'g_mountain_road', 'g_plateau', 'g_village_road', 'g_mud', 'g_climb', 'g_mud_rain', 'g_bayram']) L.push(loadImg(n, `../assets/sprites/${n}.png`));
   await Promise.all(L);
   return true;
 }
@@ -111,7 +111,7 @@ K.k6 = (g, t) => {
 // K8 26.9–30.1 muddy field track (GPT) – white Toros A -> B through the mud, splashes
 K.k8 = (g, t) => {
   const lt = t - 26.9, ppm = 170, d = MK8.pos(lt);
-  bgPan(g, IMG.g_mud, lt, 0.004);
+  bgPan(g, IMG.g_mud_rain, lt, 0.004);
   const md = model('station'), s = ppm / md.m.pxPerM;
   const car = drawCar(g, { kind: 'station', color: 'white', x: -460 + d * ppm, gy: 1430, ppm, dist: d, v: 2.9, t, bodyOver: KV.mud, bodyOverA: clamp(0.25 + lt / 2.2, 0, 1), noExhaust: true });
   for (const wx of md.m.wheels.map(w => car.left + w[0] * s)) for (let i = 0; i < 22; i++) {
@@ -119,6 +119,35 @@ K.k8 = (g, t) => {
     g.fillStyle = `rgba(92,62,32,${0.9 * (1 - ph)})`; g.beginPath(); g.ellipse(px, py, 7 + hash(i) * 8, 5 + hash(i + 1) * 5, ph * 3, 0, 7); g.fill();
   }
   kCaptions(g, t, 1620);
+  return d;
+};
+
+// K7 23.7–26.9 bayram road at sunset (GPT) – blue Toros with luggage drives away from camera
+K.k7 = (g, t) => {
+  const lt = t - 23.7, HZ = 936, VX = 540;
+  bgPan(g, IMG.g_bayram, lt, 0.01);
+  const k = lt / 3.2, y = lerp(1400, 1080, 1 - Math.pow(1 - k, 1.4));
+  const roadW = 3.31 * (y - HZ), x = VX + roadW * 0.2, wpx = roadW * 0.24;
+  const im = IMG.rear_blue, s = wpx / im.width, top = y - im.height * s, bob = Math.sin(lt * 11) * wpx * 0.003;
+  g.drawImage(im, x - wpx / 2, top - bob, wpx, im.height * s);
+  const L = (x0, y0, w, h, col) => { g.beginPath(); g.roundRect(x - wpx / 2 + x0 * s, top - bob + y0 * s, w * s, h * s, 10 * s); g.fillStyle = col; g.fill(); g.strokeStyle = '#221d18'; g.lineWidth = 3 * s; g.stroke(); };
+  L(150, -120, 300, 130, '#8a4b2f'); L(470, -150, 260, 160, '#2f5d7a'); L(250, -230, 420, 110, '#c2873e'); L(720, -90, 120, 100, '#6b6f3a');
+  g.strokeStyle = '#e9e1cf'; g.lineWidth = 5 * s; for (const xx of [300, 600]) { g.beginPath(); g.moveTo(x - wpx / 2 + xx * s, top - bob + 15 * s); g.lineTo(x - wpx / 2 + xx * s, top - bob - 235 * s); g.stroke(); }
+  for (let i = 0; i < 5; i++) { const ph = (lt * 1.8 + i / 5) % 1; g.fillStyle = `rgba(240,235,225,${0.35 * (1 - ph)})`; g.beginPath(); g.arc(x - wpx / 2 + 200 * s - ph * 40 * s, y - 70 * s - ph * 50 * s, (20 + ph * 60) * s, 0, 7); g.fill(); }
+  kCaptions(g, t, 1700);
+  return lt * 3.1;
+};
+// K10 33.3–36.5 mountain track climb (GPT) – red Toros climbs the slope, goat on the big boulder
+K.k10 = (g, t) => {
+  const lt = t - 33.3, d = MK10.pos(lt);
+  bgPan(g, IMG.g_climb, lt, 0.004);
+  const th = Math.atan2(1370 - 1010, 1080), ppm = 150;
+  const u = -260 + d * ppm, ox = u * Math.cos(th), oy = 1370 - u * Math.sin(th);
+  g.save(); g.translate(ox, oy); g.rotate(-th);
+  drawCar(g, { kind: 'station', color: 'red', x: 0, gy: 0, ppm, dist: d, v: 2.2, t });
+  g.restore();
+  goat(g, 770, 1318, 160, { t, bleat: Math.max(0, Math.sin(clamp((lt - 1.0) / 0.9, 0, 1) * Math.PI)), dir: -1 });
+  kCaptions(g, t, 1800);
   return d;
 };
 window.ready6 = gptLoad();
