@@ -8,8 +8,8 @@ const fs = require('fs');
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
   page.on('console', m => console.log('[page]', m.text()));
   page.on('pageerror', e => { console.error('[pageerror]', e.message); process.exitCode = 2; });
-  await page.goto('http://127.0.0.1:8765/render/index.html');
-  await page.evaluate(() => window.ready);
+  await page.goto('http://127.0.0.1:8765/render/' + (process.env.PAGE || 'index.html'));
+  await page.evaluate(() => window.ready2 || window.ready);
   const grab = async (t, q) => {
     const b64 = await page.evaluate(([t, q]) => { window.render(t); return document.getElementById('c').toDataURL(q ? 'image/jpeg' : 'image/png', q || undefined).split(',')[1]; }, [t, q]);
     return Buffer.from(b64, 'base64');

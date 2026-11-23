@@ -3,3 +3,6 @@ out/*.wav
 out/video_only.mp4
 out/list.txt
 __pycache__/
+out/kparts/
+out/keci_video.mp4
+out/klist.txt

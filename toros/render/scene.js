@@ -25,6 +25,7 @@ async function loadAll() {
   L.push(loadImg('front', '../assets/sprites/front_white.png'));
   await Promise.all(L);
   await Promise.all(['IBlack', 'IBlackI', 'IXB', 'IBold'].map(f => document.fonts.load(`80px ${f}`, 'ÇĞİÖŞÜçğıöşü')));
+  window.NO_SHADOW = true;
   buildDecorated();
   buildGrain();
 }
@@ -99,7 +100,7 @@ function buildDecorated() {
 }
 
 // whole wheel (tyre + rim + hub cap) rotates as ONE rigid body; angle comes from distance rolled.
-function drawWheel(g, md, cx, cy, rPx, angle, dAng) {
+function drawWheel(g, md, cx, cy, rPx, angle, dAng, chains) {
   const img = IMG[md.wheel];
   const k = rPx / md.wheelR, S = md.wheelSize * k;
   const spread = Math.abs(dAng);                       // 360° shutter: blur = rotation during one frame
@@ -112,6 +113,20 @@ function drawWheel(g, md, cx, cy, rPx, angle, dAng) {
     g.restore();
   }
   g.globalAlpha = 1;
+  if (chains) { // snow chains: cross links over the tread + side chain, rotate with the wheel
+    g.save(); g.translate(cx, cy); g.rotate(angle);
+    g.strokeStyle = '#c9ccd2'; g.lineCap = 'round';
+    for (let k = 0; k < 10; k++) {
+      const a = k * Math.PI / 5;
+      g.lineWidth = rPx * 0.075; g.strokeStyle = '#3b3d42';
+      g.beginPath(); g.moveTo(Math.cos(a) * rPx * 0.74, Math.sin(a) * rPx * 0.74); g.lineTo(Math.cos(a) * rPx * 1.01, Math.sin(a) * rPx * 1.01); g.stroke();
+      g.lineWidth = rPx * 0.04; g.strokeStyle = '#d5d8de';
+      g.beginPath(); g.moveTo(Math.cos(a) * rPx * 0.75, Math.sin(a) * rPx * 0.75); g.lineTo(Math.cos(a) * rPx * 1.0, Math.sin(a) * rPx * 1.0); g.stroke();
+    }
+    g.lineWidth = rPx * 0.035; g.strokeStyle = '#d5d8de'; g.setLineDash([rPx * 0.07, rPx * 0.05]);
+    g.beginPath(); g.arc(0, 0, rPx * 0.76, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
+    g.restore();
+  }
   // fixed (non-rotating) lighting: sun from upper-left, ground bounce – sells the rotation
   g.save(); g.beginPath(); g.arc(cx, cy, rPx * 0.995, 0, Math.PI * 2); g.clip();
   const lg = g.createLinearGradient(cx - rPx * 0.6, cy - rPx, cx + rPx * 0.5, cy + rPx);
@@ -128,7 +143,7 @@ function drawCar(g, o) {
   const left = o.x - w / 2;
   const top = o.gy - m.ground * s;
   // clean contact shadow (baked reference shadows were removed)
-  if (!o.noShadow) {
+  if (!o.noShadow && !window.NO_SHADOW) {
     g.save();
     const sg = g.createRadialGradient(o.x, o.gy, 0, o.x, o.gy, w * 0.52);
     sg.addColorStop(0, `rgba(30,24,18,${0.30 * (o.shadowA ?? 1)})`); sg.addColorStop(0.75, `rgba(30,24,18,${0.16 * (o.shadowA ?? 1)})`); sg.addColorStop(1, 'rgba(30,24,18,0)');
@@ -137,14 +152,16 @@ function drawCar(g, o) {
   }
   // suspension: body floats a hair on the springs, wheels stay planted
   const bob = (o.bob ?? 1) * (Math.sin(o.dist * 2.1) * 0.9 + Math.sin(o.dist * 5.3 + 1) * 0.5) * clamp(Math.abs(o.v) / 2, 0, 1) * s * 2.2;
-  const body = DECO[o.kind + '_' + o.color];
+  const body = o.bodyImg || DECO[o.kind + '_' + o.color];
   if (o.bodyBlur) { g.save(); g.filter = `blur(${o.bodyBlur}px)`; }
   g.drawImage(body, left, top - bob, w, h);
   if (o.bodyBlur) g.restore();
+  if (o.bodyOver) { g.save(); g.globalAlpha = o.bodyOverA ?? 1; g.drawImage(o.bodyOver, left, top - bob, w, h); g.restore(); }
   const rPx = m.rTire * s;
   const ang = o.dist / md.rM;
   const dAng = (o.v / FPS) / md.rM;
-  for (const [wx] of m.wheels) drawWheel(g, md, left + wx * s, o.gy - rPx, rPx, ang, dAng);
+  for (const [wx] of m.wheels) drawWheel(g, md, left + wx * s, o.gy - rPx, rPx, ang, dAng, o.chains);
+  if (o.onBody) o.onBody(g, left, top - bob, s);
   if (o.color === 'police') drawLightbar(g, o, left, top - bob, s);
   if (o.color === 'taxi') drawTaxiSign(g, o, left, top - bob, s);
   // exhaust puffs
@@ -397,8 +414,8 @@ function chip(g, s, x, y, o = {}) {
 // word-by-word pop captions (Shorts style) – highlighted words in yellow
 const CAPS = [
   [5.4, 10.8, '1971’de Bursa’da ilk Renault 12 banttan indi.', ['1971’de', 'Bursa’da']],
-  [11.3, 14.8, 'Sedanı aileyi taşıdı…', ['Sedanı']],
-  [14.8, 18.3, '…Station’ı yükü. 1989’da adı kondu: TOROS!', ['Station’ı', 'TOROS!']],
+  [11.3, 14.8, 'Önce aileleri taşıdı…', ['aileleri']],
+  [14.8, 18.3, '…sonra yükü de. 1989’da adı kondu: TOROS!', ['yükü', 'TOROS!']],
   [18.8, 23.5, 'Beyazı, kırmızısı, yeşili, mavisi, siyahı…', ['kırmızısı,', 'yeşili,', 'mavisi,', 'siyahı…']],
   [23.5, 28.3, 'Her mahallede mutlaka bir tane vardı.', ['mutlaka']],
   [28.8, 34.8, 'Taksi durağında da oydu, polis ekibinde de.', ['Taksi', 'polis']],
@@ -585,11 +602,9 @@ function scene3(g, t) {
   const tb = lt - 3.6, xb = start + M3b.pos(tb) * ppm;
   if (lt < 4.6) {
     drawCar(g, { kind: 'sedan', color: 'white', x: xa, gy: 1290, ppm, dist: M3a.pos(lt), v: 3.3, t });
-    chip(g, 'SEDAN', xa, 900, { size: 44, bg: '#1b1713', fill: '#fff', border: '#ffd84a' });
   }
   if (tb > -0.4) {
     drawCar(g, { kind: 'station', color: 'white', x: xb, gy: 1290, ppm, dist: M3b.pos(tb), v: 3.2, t });
-    chip(g, 'STATION', xb, 880, { size: 44, bg: '#1b1713', fill: '#fff', border: '#ffd84a' });
     const ks = seg(lt, 5.35, 5.6);
     if (ks > 0) {
       g.save(); g.translate(xb + 40, 760); g.rotate(-0.08); const sk = 1 + (1 - easeOut(ks)) * 1.4; g.scale(sk, sk); g.globalAlpha = ks;
@@ -599,7 +614,7 @@ function scene3(g, t) {
       g.fillText('1989: ADI TOROS', 0, 4); g.restore();
     }
   }
-  chapter(g, t, S3.a + 0.1, S3.b, 'İKİ KASA', 'Sedan ve Station');
+  chapter(g, t, S3.a + 0.1, S3.b, 'İKİ KASA', 'Aynı ruh');
   captions(g, t);
   finish(g, t);
 }

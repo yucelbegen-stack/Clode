@@ -40,6 +40,7 @@ PAINTS={
  'black':(30,32,36),
  'taxi':(246,190,16),
  'police':None,   # white base, decals in renderer
+ 'orange':(214,104,32),
 }
 def paint_mask(a,extra_exclude=None):
     lum=a.mean(-1); mx=a.max(-1); mn=a.min(-1); s=(mx-mn)/np.maximum(mx,1)
