@@ -7,7 +7,7 @@ const KV = {};              // extra sprites/variants
 async function kLoad() {
   await window.ready;
   const L = [];
-  for (const [k, f] of [['sedan_orange', 'side_sedan_orange'], ['station_orange', 'side_station_orange'], ['rear_blue', 'rear_blue'], ['rear_red', 'rear_red'], ['rear_green', 'rear_green'], ['bg_village1', 'bg_village1'], ['bg_village2', 'bg_village2'], ['bg_snow', 'bg_snow'], ['bg_crank', 'bg_crank'], ['bg_crank_ng', 'bg_crank_noglass'], ['bg_crank_nh', 'bg_crank_nohand'], ['hand_crank', 'hand_crank']])
+  for (const [k, f] of [['sedan_orange', 'side_sedan_orange'], ['station_orange', 'side_station_orange'], ['rear_blue', 'rear_blue'], ['rear_red', 'rear_red'], ['rear_green', 'rear_green'], ['bg_village1', 'bgv_village1'], ['bg_village2', 'bgv_village2'], ['bg_snow', 'bgv_snow'], ['bg_crank', 'bgv_crank'], ['bg_crank_ng', 'bgv_crank_noglass'], ['bg_crank_nh', 'bgv_crank_nohand'], ['hand_crank', 'hand_crank_v'], ['front_green', 'front_green'], ['front_red', 'front_red']])
     L.push(loadImg(k, `../assets/sprites/${f}.png`));
   L.push(loadImg('family', '../assets/src/family_illus.png'));
   await Promise.all(L);
@@ -304,43 +304,48 @@ K.k1 = (g, t, noText) => {
 // K2 3.5–10.5: Bursa plant – assembly line (wheels still: cars ride the conveyor), then the yard full of R12s
 K.k2 = (g, t) => {
   const lt = t - 3.5;
-  if (lt < 3.3) { // interior
-    const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#3b4350'); bg.addColorStop(1, '#232830'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
-    // windows with light beams
-    for (let i = 0; i < 5; i++) { const x = 40 + i * 210; g.fillStyle = '#9fc3dc'; g.fillRect(x, 420, 150, 220); g.strokeStyle = '#1b1f26'; g.lineWidth = 6; g.strokeRect(x, 420, 150, 220); g.beginPath(); g.moveTo(x + 75, 420); g.lineTo(x + 75, 640); g.moveTo(x, 530); g.lineTo(x + 150, 530); g.stroke(); }
+  if (lt < 3.3) { // interior: finished cars roll off the line on their own wheels (A -> B), robot welder at work
+    const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#5b4c3e'); bg.addColorStop(1, '#3d332a'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 5; i++) { const x = 40 + i * 210; g.fillStyle = '#b9c2b8'; g.fillRect(x, 420, 150, 220); g.beginPath(); g.rect(x, 420, 150, 220); ink(g, 5); g.beginPath(); g.moveTo(x + 75, 420); g.lineTo(x + 75, 640); g.moveTo(x, 530); g.lineTo(x + 150, 530); ink(g, 4); }
     g.save(); g.globalCompositeOperation = 'lighter';
-    for (let i = 0; i < 5; i++) { const x = 40 + i * 210; const lg = g.createLinearGradient(x, 640, x + 200, 1300); lg.addColorStop(0, 'rgba(255,240,200,0.16)'); lg.addColorStop(1, 'rgba(255,240,200,0)'); g.fillStyle = lg; g.beginPath(); g.moveTo(x, 640); g.lineTo(x + 150, 640); g.lineTo(x + 380, 1320); g.lineTo(x + 160, 1320); g.closePath(); g.fill(); }
+    for (let i = 0; i < 5; i++) { const x = 40 + i * 210; const lg = g.createLinearGradient(x, 640, x + 200, 1300); lg.addColorStop(0, 'rgba(255,236,200,0.14)'); lg.addColorStop(1, 'rgba(255,236,200,0)'); g.fillStyle = lg; g.beginPath(); g.moveTo(x, 640); g.lineTo(x + 150, 640); g.lineTo(x + 380, 1320); g.lineTo(x + 160, 1320); g.closePath(); g.fill(); }
     g.restore();
-    // roof trusses
-    g.strokeStyle = '#59616e'; g.lineWidth = 8; for (let x = -60; x < W + 60; x += 120) { g.beginPath(); g.moveTo(x, 300); g.lineTo(x + 60, 360); g.lineTo(x + 120, 300); g.stroke(); }
-    g.beginPath(); g.moveTo(0, 300); g.lineTo(W, 300); g.moveTo(0, 360); g.lineTo(W, 360); g.stroke();
-    // hanging lamps
-    for (let i = 0; i < 4; i++) { const x = 140 + i * 270; g.strokeStyle = '#222'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, 360); g.lineTo(x, 700); g.stroke(); g.fillStyle = '#2f343c'; g.beginPath(); g.moveTo(x - 50, 740); g.lineTo(x + 50, 740); g.lineTo(x + 22, 700); g.lineTo(x - 22, 700); g.closePath(); g.fill(); const gl = g.createRadialGradient(x, 760, 0, x, 760, 260); gl.addColorStop(0, 'rgba(255,230,160,0.35)'); gl.addColorStop(1, 'rgba(255,230,160,0)'); g.fillStyle = gl; g.beginPath(); g.arc(x, 760, 260, 0, 7); g.fill(); }
-    // floor + conveyor
-    g.fillStyle = '#4a4f57'; g.fillRect(0, 1320, W, H - 1320);
-    g.fillStyle = '#2a2d33'; g.fillRect(0, 1262, W, 58); g.fillStyle = '#e0b33a'; g.fillRect(0, 1250, W, 12);
-    const conv = lt * 0.9; // m
-    for (let x = -((conv * 160) % 60); x < W; x += 60) { g.fillStyle = '#5d636d'; g.beginPath(); g.arc(x, 1291, 16, 0, 7); g.fill(); g.strokeStyle = '#1b1f26'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, 1291); g.lineTo(x + Math.cos(conv * 10) * 16, 1291 + Math.sin(conv * 10) * 16); g.stroke(); }
-    const ppm = 160;
-    [['green', -1.2], ['blue', 4.6], ['white', 10.4]].forEach(([c, x0]) => {
-      const x = (x0 + conv) * ppm - 200;
-      if (x > -700 && x < W + 700) drawCar(g, { kind: 'sedan', color: c, x, gy: 1250, ppm, dist: 0, v: 0, t, noExhaust: true, bob: 0 }); // wheels static on the line
-    });
-    // welding sparks
-    for (let i = 0; i < 40; i++) { const ph = (lt * 2.2 + hash(i)) % 1; const sx = 560 + Math.cos(hash(i + 1) * 6.28) * ph * 160, sy = 1040 + ph * ph * 260 - Math.sin(hash(i + 2) * 3) * ph * 120; g.fillStyle = `rgba(255,${200 + 55 * hash(i)},120,${1 - ph})`; g.fillRect(sx, sy, 5, 5); }
-    const gl = g.createRadialGradient(560, 1040, 0, 560, 1040, 90); gl.addColorStop(0, `rgba(190,220,255,${0.6 + 0.3 * Math.sin(lt * 40)})`); gl.addColorStop(1, 'rgba(190,220,255,0)'); g.fillStyle = gl; g.beginPath(); g.arc(560, 1040, 90, 0, 7); g.fill();
+    g.save(); g.beginPath(); g.rect(0, 0, W, 1250); g.globalAlpha = 0.5; g.fillStyle = HATCH_L; g.fill(); g.restore();
+    for (let x = -60; x < W + 60; x += 120) { g.beginPath(); g.moveTo(x, 300); g.lineTo(x + 60, 360); g.lineTo(x + 120, 300); ink(g, 7); }
+    g.beginPath(); g.moveTo(0, 300); g.lineTo(W, 300); g.moveTo(0, 360); g.lineTo(W, 360); ink(g, 7);
+    for (let i = 0; i < 4; i++) { const x = 140 + i * 270; g.beginPath(); g.moveTo(x, 360); g.lineTo(x, 700); ink(g, 3); g.beginPath(); g.moveTo(x - 50, 740); g.lineTo(x + 50, 740); g.lineTo(x + 22, 700); g.lineTo(x - 22, 700); g.closePath(); g.fillStyle = '#4a4038'; g.fill(); ink(g, 2); const gl = g.createRadialGradient(x, 760, 0, x, 760, 260); gl.addColorStop(0, 'rgba(255,228,170,0.30)'); gl.addColorStop(1, 'rgba(255,228,170,0)'); g.fillStyle = gl; g.beginPath(); g.arc(x, 760, 260, 0, 7); g.fill(); }
+    // plain concrete floor (nothing coloured under the cars)
+    g.fillStyle = '#8b7e6c'; g.fillRect(0, 1250, W, H - 1250);
+    g.strokeStyle = 'rgba(58,42,28,0.35)'; g.lineWidth = 2; for (let y = 1300; y < H; y += 90) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+    g.beginPath(); g.moveTo(0, 1250); g.lineTo(W, 1250); ink(g, 3);
+    const ppm = 160, v = 1.5;
+    const cars = [['green', -5.5], ['blue', -0.3], ['white', 4.9]].map(([c, x0]) => ({ c, d: x0 + lt * v }));
+    // robot welder hanging from the roof rail; torch tip touches the passing body
+    const TX = 700, TY = 1150;
+    const near = cars.some(o => { const cx = 0 + o.d * ppm; return TX > cx - 280 && TX < cx + 300; });
+    g.lineCap = 'round';
+    g.beginPath(); g.moveTo(820, 360); g.lineTo(820, 760); g.lineTo(TX + 40, 1060); g.lineTo(TX, TY - 6);
+    g.strokeStyle = '#d0902e'; g.lineWidth = 26; g.stroke(); g.lineWidth = 3; g.strokeStyle = INK2; g.stroke();
+    for (const [jx, jy] of [[820, 760], [TX + 40, 1060]]) { g.beginPath(); g.arc(jx, jy, 20, 0, 7); g.fillStyle = '#6f6458'; g.fill(); ink(g, 3); }
+    g.beginPath(); g.rect(790, 330, 60, 34); g.fillStyle = '#6f6458'; g.fill(); ink(g, 3);
+    cars.forEach(o => { const x = o.d * ppm; if (x > -700 && x < W + 700) drawCar(g, { kind: 'sedan', color: o.c, x, gy: 1250, ppm, dist: o.d, v, t, noExhaust: true, bob: 0.3 }); });
+    if (near) {
+      for (let i = 0; i < 46; i++) { const ph = (lt * 2.6 + hash(i)) % 1; const an = -Math.PI * (0.15 + 0.7 * hash(i + 1)); const sp = 140 + 160 * hash(i + 2);
+        const sx = TX + Math.cos(an) * ph * sp - 40 * ph, sy = TY + Math.sin(an) * ph * sp + ph * ph * 260; g.fillStyle = `rgba(255,${190 + 60 * hash(i)},110,${1 - ph})`; g.fillRect(sx, sy, 4, 4); }
+      const gl = g.createRadialGradient(TX, TY, 0, TX, TY, 110); gl.addColorStop(0, `rgba(210,230,255,${0.75 + 0.25 * Math.sin(lt * 50)})`); gl.addColorStop(1, 'rgba(210,230,255,0)'); g.fillStyle = gl; g.beginPath(); g.arc(TX, TY, 110, 0, 7); g.fill();
+    }
     chip(g, 'BURSA · 1971', W / 2, 300, { size: 56, bg: '#1b1713', fill: '#ffd84a', border: '#ffd84a', ls: 3, k: 0.7 + 0.3 * easeOutBack(seg(lt, 0, 0.3)) });
   } else { // yard
     const ly = lt - 3.3, pan = ly * 1.1, ppm = 150;
     villageWorld(g, pan, ppm, t, { poles: false, horizon: 900, roadY0: 1330, roadY1: 1420, road: { noDash: true, asphalt: '#8b8984' } });
     factory(g, -60 - pan * ppm * 0.5, 1000);
-    // parking rows (static cars)
     g.fillStyle = '#8d8b86'; g.fillRect(0, 1000, W, 330);
     g.strokeStyle = '#f2efe6'; g.lineWidth = 4; layer(g, pan * ppm, 1, 300, x => { g.beginPath(); g.moveTo(x, 1010); g.lineTo(x - 30, 1150); g.moveTo(x, 1170); g.lineTo(x - 30, 1320); g.stroke(); }, 0);
-    const row = (gy, rp, sp, off) => { const o2 = pan * rp * 0.75; const i0 = Math.floor((o2 - 400) / sp), i1 = Math.ceil((o2 + W + 400) / sp);
-      for (let i = i0; i <= i1; i++) { const c = ((i + off) % 2 + 2) % 2 ? 'green' : 'blue'; drawCar(g, { kind: 'sedan', color: c, x: i * sp - o2, gy, ppm: rp, dist: 0, v: 0, t, noExhaust: true, bob: 0 }); } };
-    row(1150, 92, 450, 0);
-    row(1318, 118, 570, 1);
+    // new cars leave the yard in two lanes, wheels rolling
+    const row = (gy, rp, sp, off, v) => { const o2 = pan * rp * 0.75 - ly * v * rp; const i0 = Math.floor((o2 - 400) / sp), i1 = Math.ceil((o2 + W + 400) / sp);
+      for (let i = i0; i <= i1; i++) { const c = ((i + off) % 2 + 2) % 2 ? 'green' : 'blue'; drawCar(g, { kind: 'sedan', color: c, x: i * sp - o2, gy, ppm: rp, dist: ly * v + i * 3.1, v, t, noExhaust: true, bob: 0.4 }); } };
+    row(1150, 92, 450, 0, 1.2);
+    row(1318, 118, 570, 1, 1.8);
     chip(g, 'BURSA · 1971', W / 2, 300, { size: 56, bg: '#1b1713', fill: '#ffd84a', border: '#ffd84a', ls: 3 });
   }
   kCaptions(g, t);
@@ -576,9 +581,9 @@ K.k10 = (g, t) => {
   drawCar(g, { kind: 'station', color: 'red', x: 0, gy: 0, ppm, dist, v: 2.2, t });
   g.restore();
   // foreground rock with goat
-  rockMass(g, [[-30, H + 10], [-30, 1560], [110, 1505], [250, 1525], [380, 1620], [430, H + 10]], '#a3927a');
-  goat(g, 190, 1512, 135, { t, bleat: Math.max(0, Math.sin(clamp((lt - 1.0) / 0.9, 0, 1) * Math.PI)), dir: 1 });
-  kCaptions(g, t);
+  rockMass(g, [[640, H + 10], [700, 1700], [820, 1630], [960, 1650], [1110, 1720], [1110, H + 10]], '#a3927a');
+  goat(g, 900, 1642, 125, { t, bleat: Math.max(0, Math.sin(clamp((lt - 1.0) / 0.9, 0, 1) * Math.PI)), dir: -1 });
+  kCaptions(g, t, 1800);
   return dist;
 };
 
@@ -749,8 +754,8 @@ K.k15 = (g, t) => {
 };
 
 // K16 51–54.5: town avenue full of Toroses & taxis, two-way traffic
-const TRAFFIC_R = [['station', 'red', 0], ['sedan', 'taxi', 1.6], ['station', 'blue', 3.2], ['sedan', 'taxi', 4.8], ['station', 'green', 6.4], ['sedan', 'taxi', 8.0], ['station', 'white', 9.6]];
-const TRAFFIC_L = [['station', 'white', 0], ['sedan', 'red', 1.6], ['station', 'green', 3.2], ['sedan', 'blue', 4.8], ['station', 'red', 6.4], ['sedan', 'green', 8.0]];
+const TRAFFIC_R = [['station', 'red', 0], ['sedan', 'taxi', 2.1], ['station', 'blue', 4.2], ['sedan', 'taxi', 6.3], ['station', 'green', 8.4], ['sedan', 'taxi', 10.5], ['station', 'white', 12.6]];
+const TRAFFIC_L = [['station', 'white', 0], ['sedan', 'red', 2.3], ['station', 'green', 4.6], ['sedan', 'blue', 6.9], ['station', 'red', 9.2], ['sedan', 'green', 11.5]];
 K.k16 = (g, t) => {
   const lt = t - 51;
   townWorld(g, lt * 0.6, 150, t);
@@ -838,23 +843,46 @@ function pathX(path, y) { // interpolate centre-line x for a screen y (path sort
   for (let i = 0; i < path.length - 1; i++) { const [y0, x0] = path[i], [y1, x1] = path[i + 1]; if (y <= y0 && y >= y1) return lerp(x0, x1, (y0 - y) / (y0 - y1)); }
   return path[path.length - 1][1];
 }
-// K6 20.5–23.7: village dirt road (user photo) – green Toros pulls away up the lane, dust behind
+// front-view car coming TOWARD the camera on a perspective road. tyres (x ranges in sprite px) get rolling tread
+const FRONT_TYRES = [[42, 195], [878, 1032]];
+function frontCar(g, img, x, gy, wpx, t, distM, o = {}) {
+  const s = wpx / img.width, h = img.height * s, top = gy - h;
+  const bob = (Math.sin(distM * 2.1) * 0.9 + Math.sin(distM * 5.3 + 1) * 0.5) * (wpx / 700);
+  g.drawImage(img, x - wpx / 2, top - bob, wpx, h);
+  for (const [a0, a1] of FRONT_TYRES) {                    // tread blocks scroll down as the tyre rolls toward us
+    const x0 = x - wpx / 2 + a0 * s, tw = (a1 - a0) * s, y0 = top + 760 * s, th = (img.height - 760) * s;
+    g.save(); g.beginPath(); g.rect(x0, y0, tw, th); g.clip();
+    const per = 22 * s, off = ((distM / 0.30) * 0.30 * 160 * s) % per;
+    g.strokeStyle = 'rgba(10,8,6,0.55)'; g.lineWidth = 6 * s;
+    for (let yy = y0 - per + off; yy < y0 + th + per; yy += per) { g.beginPath(); g.moveTo(x0, yy); g.lineTo(x0 + tw, yy); g.stroke(); }
+    if (o.chains) { g.strokeStyle = '#d5d8de'; g.lineWidth = 5 * s; for (let yy = y0 - per * 2 + off * 2 % (per * 2); yy < y0 + th + per; yy += per * 2) { g.beginPath(); g.moveTo(x0, yy); g.lineTo(x0 + tw, yy + 10 * s); g.stroke(); } g.strokeStyle = '#3b3d42'; g.lineWidth = 3 * s; g.beginPath(); g.moveTo(x0 + tw / 2, y0); g.lineTo(x0 + tw / 2, y0 + th); g.stroke(); }
+    g.restore();
+  }
+  if (o.dust) for (let i = 0; i < 12; i++) { const ph = (t * 1.4 + i / 12) % 1; g.fillStyle = `rgba(222,196,150,${0.35 * (1 - ph)})`; g.beginPath(); g.arc(x + (hash(i) - 0.5) * wpx * 1.2, gy - ph * wpx * 0.15, (0.05 + ph * 0.2) * wpx, 0, 7); g.fill(); }
+  // soft contact shadow only (no black blobs)
+  return { top, s };
+}
+function pathX(path, y) {
+  for (let i = 0; i < path.length - 1; i++) { const [y0, x0] = path[i], [y1, x1] = path[i + 1]; if (y <= y0 && y >= y1) return lerp(x0, x1, (y0 - y) / (y0 - y1)); }
+  return path[path.length - 1][1];
+}
+// K6 20.5–23.7: village dirt road (user photo via Adobe) – green Toros comes down the lane toward us
 K.k6 = (g, t) => {
   const lt = t - 20.5;
   photoBg(g, IMG.bg_village1, 1.02 + lt * 0.006);
-  const z = 2.3 + lt * 3.0, y = 1060 + 1930 / z;
+  const z = Math.max(2.4, 11 - lt * 2.9), y = 1060 + 1930 / z, dist = lt * 2.9;
   const x = pathX([[1920, 650], [1435, 597], [1148, 482], [1060, 413]], y);
-  rearCar(g, IMG.rear_green, x, y, 0.74 * (y - 1060), t, { dust: true });
+  frontCar(g, IMG.front_green, x, y, 0.80 * (y - 1060), t, dist, { dust: true });
   kCaptions(g, t, 1540);
-  return z;
+  return dist;
 };
-// K9 30.1–33.3: snowy mountain road (user photo) – red Toros with chains climbs into the bend, snowfall
+// K9 30.1–33.3: snowy mountain road (user photo via Adobe) – red Toros with chains comes out of the bend toward us
 K.k9 = (g, t) => {
   const lt = t - 30.1;
-  photoBg(g, IMG.bg_snow, 1.07 + lt * 0.006);
-  const z = 2.0 + lt * 2.4, y = 1000 + 1800 / z;
+  photoBg(g, IMG.bg_snow, 1.05 + lt * 0.006);
+  const z = Math.max(2.3, 10 - lt * 2.4), y = 1000 + 1800 / z, dist = lt * 2.4;
   const x = pathX([[1920, 540], [1493, 545], [1263, 620], [1102, 637], [1000, 600]], y);
-  rearCar(g, IMG.rear_red, x, y, 0.61 * (y - 1000), t, { chains: true });
+  frontCar(g, IMG.front_red, x, y, 0.66 * (y - 1000), t, dist, { chains: true });
   for (let i = 0; i < 220; i++) {
     const depth = 0.4 + hash(i) * 1.4, sp = 80 * depth;
     const xx = ((hash(i + 1) * W * 1.4 - lt * sp * 1.1) % (W * 1.2) + W * 1.2) % (W * 1.2) - 60;
@@ -862,7 +890,7 @@ K.k9 = (g, t) => {
     g.fillStyle = `rgba(255,255,255,${0.5 + 0.45 * hash(i + 3)})`; g.beginPath(); g.arc(xx, yy, 1.5 + depth * 3.2, 0, 7); g.fill();
   }
   kCaptions(g, t, 1540);
-  return z;
+  return dist;
 };
 // K11 36.5–39.5: driver's seat (user photo) – heavy, unassisted steering: camera roll + jolts
 K.k11 = (g, t) => {
@@ -907,12 +935,10 @@ K.k12 = (g, t) => {
   // CRANK TURNS (3 full turns = glass travel). Arm rotates about the hub; the hand follows the knob,
   // forearm pivots from an off-screen shoulder. After 3 turns everything is back in the photo's pose.
   if (k > 0 && k < 1) {
-    const P = [583, 1270], G0 = [478, 1360], Sh = [-700, 2700];
+    const P = [590, 1262], G0 = [505, 1335];
     const th = k * 3 * Math.PI * 2;                       // clockwise on screen
     const vx = G0[0] - P[0], vy = G0[1] - P[1];
     const G = [P[0] + vx * Math.cos(th) - vy * Math.sin(th), P[1] + vx * Math.sin(th) + vy * Math.cos(th)];
-    const phi = Math.atan2(G[1] - Sh[1], G[0] - Sh[0]) - Math.atan2(G0[1] - Sh[1], G0[0] - Sh[0]);
-    const sc = Math.hypot(G[0] - Sh[0], G[1] - Sh[1]) / Math.hypot(G0[0] - Sh[0], G0[1] - Sh[1]);
     g.save(); g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2);
     // crank: hub + metal arm + knob
     g.lineCap = 'round';
@@ -923,13 +949,12 @@ K.k12 = (g, t) => {
     g.fillStyle = '#4a4744'; g.beginPath(); g.arc(P[0] - 6, P[1] - 6, 12, 0, 7); g.fill();
     g.fillStyle = '#1e1c1a'; g.beginPath(); g.arc(G[0], G[1], 22, 0, 7); g.fill();
     // hand + forearm layer
-    g.translate(Sh[0], Sh[1]); g.rotate(phi); g.scale(sc, sc); g.translate(G0[0] - Sh[0], G0[1] - Sh[1]);
-    g.rotate(-phi * 0.75 + Math.sin(th) * 0.05);           // wrist keeps the grip natural
-    g.translate(-G0[0], -G0[1]);
+    // hand follows the knob around the circle; the wrist rocks slightly with the turn
+    g.translate(G[0], G[1]); g.rotate(Math.sin(th) * 0.07); g.translate(-G0[0], -G0[1]);
     g.drawImage(IMG.hand_crank, -500, 0, W + 500, H + 500);
     g.restore();
   }
-  const px = 585, py = 1268;
+  const px = 590, py = 1262;
   // turning arrow
   const ar = k * 3 * Math.PI * 2;
   g.save(); g.globalAlpha = seg(lt, 0.2, 0.4) * (1 - seg(lt, 2.5, 2.8)); g.strokeStyle = '#ffd84a'; g.lineWidth = 12; g.lineCap = 'round';
@@ -996,6 +1021,7 @@ function kRender(t) {
     finish(g, t, 0.38);
     g.restore(); return;
   }
+  window.__PHOTO_SCENE = ['k6', 'k9', 'k11', 'k12', 'k13', 'k17'].includes(sc[2]);
   dist = K[sc[2]](g, t) || 0;
   const odoA = ROAD.has(sc[2]) ? clamp(Math.min(t - sc[0], sc[1] - t) / 0.2, 0, 1) : 0;
   odometer(g, t, dist, odoA);

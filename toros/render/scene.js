@@ -130,7 +130,7 @@ function drawWheel(g, md, cx, cy, rPx, angle, dAng, chains) {
   // fixed (non-rotating) lighting: sun from upper-left, ground bounce – sells the rotation
   g.save(); g.beginPath(); g.arc(cx, cy, rPx * 0.995, 0, Math.PI * 2); g.clip();
   const lg = g.createLinearGradient(cx - rPx * 0.6, cy - rPx, cx + rPx * 0.5, cy + rPx);
-  lg.addColorStop(0, 'rgba(255,248,230,0.16)'); lg.addColorStop(0.45, 'rgba(255,255,255,0)'); lg.addColorStop(1, 'rgba(0,0,0,0.30)');
+  lg.addColorStop(0, 'rgba(255,248,230,0.16)'); lg.addColorStop(0.45, 'rgba(255,255,255,0)'); lg.addColorStop(1, 'rgba(40,30,20,0.10)');
   g.fillStyle = lg; g.fillRect(cx - rPx, cy - rPx, rPx * 2, rPx * 2);
   g.restore();
 }
