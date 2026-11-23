@@ -3,7 +3,7 @@
 async function gptLoad() {
   await window.ready3;
   const L = [];
-  for (const n of ['g_goat', 'g_hen_brown', 'g_hen_white', 'g_hen_black', 'g_factory_in', 'g_factory_yard', 'g_mountain_road', 'g_plateau', 'g_village_road', 'g_mud', 'g_climb', 'g_mud_rain', 'g_bayram', 'g_town', 'g_galata', 'g_house', 'g_crank', 'g_crank_nohand', 'g_crank_hand', 'g_steer']) L.push(loadImg(n, `../assets/sprites/${n}.png`));
+  for (const n of ['g_goat', 'g_hen_brown', 'g_hen_white', 'g_hen_black', 'g_factory_in', 'g_factory_yard', 'g_mountain_road', 'g_plateau', 'g_village_road', 'g_mud', 'g_climb', 'g_mud_rain', 'g_bayram', 'g_town', 'g_galata', 'g_house', 'g_crank', 'g_crank_nohand', 'g_crank_hand', 'g_steer', 'g_snow', 'g_photo']) L.push(loadImg(n, `../assets/sprites/${n}.png`));
   await Promise.all(L);
   return true;
 }
@@ -96,16 +96,20 @@ K.k4 = (g, t, noBig) => {
   kCaptions(g, t, 1600);
   return d;
 };
-// K6 20.5–23.7 village lane (GPT) – green Toros comes down the lane toward the camera
+// K6 20.5–23.7 village lane (GPT) – green Toros comes toward camera; tyres ride exactly in the two ruts
+const RUT_VIL = [[-0.4128, 968.98], [0.457, 95.68]];   // x = m*y + c for left/right rut centre (measured on the art)
+const RUT_SNOW = [[-0.3525, 828.31], [0.395, 179.62]];
+function onRuts(g, img, ruts, y, t, dist, o) {
+  const xL = ruts[0][0] * y + ruts[0][1], xR = ruts[1][0] * y + ruts[1][1];
+  const wpx = (xR - xL) / 0.776;                 // sprite tyre centres sit at 11.0% and 88.6% of its width
+  frontCar(g, img, xL - 0.110 * wpx + wpx / 2, y, wpx, t, dist, o);
+}
 K.k6 = (g, t) => {
-  const lt = t - 20.5, HZ = 945, VX = 538;
-  bgPan(g, IMG.g_village_road, lt, 0.008);
-  const k = smooth(lt / 3.2), y = lerp(1010, 1640, k * k * 0.4 + k * 0.6);   // accelerating toward us
-  const roadW = 1060 * (y - HZ) / (1920 - HZ);
-  const x = VX + (y - HZ) * 0.02;
-  const dist = (y - 1010) / 60;
-  frontCar(g, IMG.front_green, x, y, roadW * 0.56, t, dist, { dust: true });
-  kCaptions(g, t, 1700);
+  const lt = t - 20.5;
+  bgPan(g, IMG.g_village_road, lt, 0);
+  const k = smooth(lt / 3.2), y = lerp(1075, 1720, k * k * 0.45 + k * 0.55), dist = (y - 1075) / 60;
+  onRuts(g, IMG.front_green, RUT_VIL, y, t, dist, { dust: true });
+  kCaptions(g, t, 1820);
   return dist;
 };
 // K8 26.9–30.1 muddy field track (GPT) – white Toros A -> B through the mud, splashes
@@ -248,5 +252,29 @@ K.k12 = (g, t) => {
   g.restore();
   bigWord(g, 'KLİMA YOK', t, 39.55, 41.0, 300, { size: 104, fill: '#ff5a4a' });
   kCaptions(g, t, 1820);
+};
+
+// K3 10.5–12 faded print of the orange Renault 12 (GPT) drops onto the table
+K.k3 = (g, t) => {
+  const lt = t - 10.5, k = easeOut(seg(lt, 0, 0.45));
+  g.save(); g.translate(W / 2, H / 2); g.scale(lerp(1.25, 1.0, k), lerp(1.25, 1.0, k)); g.rotate(lerp(-0.08, 0, k)); g.translate(-W / 2, -H / 2);
+  g.drawImage(IMG.g_photo, 0, 0, W, H); g.restore();
+  txt(g, 'Bursa, 1971', 560, 1340, { size: 50, font: 'IBlackI', fill: '#5a4632', alpha: seg(lt, 0.4, 0.7), rot: -0.02 });
+  kCaptions(g, t, 1700);
+};
+// K9 30.1–33.3 snowy mountain road (GPT) – red Toros with chains comes toward camera, snowfall
+K.k9 = (g, t) => {
+  const lt = t - 30.1, HZ = 935, VX = 470;
+  bgPan(g, IMG.g_snow, lt, 0);
+  const k = smooth(lt / 3.2), y = lerp(960, 1700, k * k * 0.45 + k * 0.55), dist = (y - 960) / 60;
+  onRuts(g, IMG.front_red, RUT_SNOW, y, t, dist, { chains: true });
+  for (let i = 0; i < 200; i++) {
+    const depth = 0.4 + hash(i) * 1.4, sp = 80 * depth;
+    const xx = ((hash(i + 1) * W * 1.4 - lt * sp * 1.1) % (W * 1.2) + W * 1.2) % (W * 1.2) - 60;
+    const yy = (hash(i + 2) * H + lt * sp * 2.4) % H;
+    g.beginPath(); g.arc(xx, yy, 1.5 + depth * 3, 0, 7); g.fillStyle = `rgba(255,255,255,${0.55 + 0.4 * hash(i + 3)})`; g.fill();
+  }
+  kCaptions(g, t, 1820);
+  return dist;
 };
 window.ready6 = gptLoad();
