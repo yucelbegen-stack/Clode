@@ -3,7 +3,7 @@
 async function gptLoad() {
   await window.ready3;
   const L = [];
-  for (const n of ['g_goat', 'g_hen_brown', 'g_hen_white', 'g_hen_black', 'g_factory_in', 'g_factory_yard', 'g_mountain_road', 'g_plateau', 'g_village_road', 'g_mud', 'g_climb', 'g_mud_rain', 'g_bayram', 'g_town', 'g_galata', 'g_house']) L.push(loadImg(n, `../assets/sprites/${n}.png`));
+  for (const n of ['g_goat', 'g_hen_brown', 'g_hen_white', 'g_hen_black', 'g_factory_in', 'g_factory_yard', 'g_mountain_road', 'g_plateau', 'g_village_road', 'g_mud', 'g_climb', 'g_mud_rain', 'g_bayram', 'g_town', 'g_galata', 'g_house', 'g_crank', 'g_crank_nohand', 'g_crank_hand', 'g_steer']) L.push(loadImg(n, `../assets/sprites/${n}.png`));
   await Promise.all(L);
   return true;
 }
@@ -167,7 +167,7 @@ K.k13 = (g, t) => {
 K.k14 = (g, t) => {
   const lt = t - 45.5, ppm = 150, d = MK14.pos(lt);
   bgPan(g, IMG.g_galata, lt, 0.004);
-  drawCar(g, { kind: 'sedan', color: 'taxi', x: -460 + d * ppm, gy: 1478, ppm, dist: d, v: 3.4, t });
+  drawCar(g, { kind: 'sedan', color: 'taxi', x: -200 + d * ppm, gy: 1478, ppm, dist: d, v: 3.4, t });
   kCaptions(g, t, 1700);
   return d;
 };
@@ -175,7 +175,7 @@ K.k14 = (g, t) => {
 K.k15 = (g, t) => {
   const lt = t - 48.5, ppm = 150, d = MK15.pos(lt);
   bgPan(g, IMG.g_town, lt, 0.004);
-  drawCar(g, { kind: 'station', color: 'police', x: -460 + d * ppm, gy: 1482, ppm, dist: d, v: 3.2, t });
+  drawCar(g, { kind: 'station', color: 'police', x: -220 + d * ppm, gy: 1482, ppm, dist: d, v: 3.2, t });
   const ph = Math.floor(t * 6) % 2; g.fillStyle = ph ? 'rgba(40,90,255,0.07)' : 'rgba(255,40,40,0.07)'; g.fillRect(0, 0, W, H);
   kCaptions(g, t, 1700);
   return d;
@@ -192,5 +192,61 @@ K.k16 = (g, t) => {
     drawCar(g, { kind: k, color: c, x: xx, gy: 1488, ppm: ppmF, dist: (lt + off) * vF, v: vF, t }); });
   bigWord(g, 'HALKIN ARABASI', t, 51.15, 54.5, 400, { size: 120, sw: 20 });
   kCaptions(g, t, 1700);
+};
+
+// K11 36.5–39.5 driver's seat (GPT) – heavy unassisted steering: whole view rocks and strains around the wheel hub
+K.k11 = (g, t) => {
+  const lt = t - 36.5, eff = Math.sin(lt * 2.1), jolt = Math.sin(lt * 47) * 2.5 * Math.abs(eff);
+  const z = 1.06 + lt * 0.01;
+  g.save(); g.translate(540 + jolt, 1395); g.rotate(eff * 0.035); g.scale(z, z); g.translate(-540, -1395);
+  g.drawImage(IMG.g_steer, 0, 0, W, H); g.restore();
+  txt(g, 'ZORLA DÖNER!', W / 2, 260, { size: 74, font: 'IBlackI', fill: '#fff', stroke: '#111', sw: 14, alpha: seg(lt, 0.3, 0.6) * (0.55 + 0.45 * Math.abs(eff)), rot: -0.06 });
+  kCaptions(g, t, 1820);
+};
+// K12 39.5–42.5 crank window (GPT): glass starts CLOSED, crank turns 3 times, glass slides down out of sight
+const WIN_OPEN = [[0, 118], [300, 150], [560, 200], [700, 270], [800, 390], [870, 600], [920, 820], [945, 960], [0, 1000]];
+K.k12 = (g, t) => {
+  const lt = t - 39.5, k = smooth(seg(lt, 0.25, 2.55)), turning = k > 0.001 && k < 0.999;
+  const z = 1 + lt * 0.012;
+  g.save(); g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2);
+  g.drawImage(turning ? IMG.g_crank_nohand : IMG.g_crank, 0, 0, W, H);
+  // glass: tinted pane with reflections, top edge parallel to the frame, travelling down below the sill
+  const dy = k * 900;
+  if (dy < 890) {
+    g.save(); g.beginPath(); WIN_OPEN.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.clip();
+    g.translate(0, dy);
+    g.beginPath(); WIN_OPEN.slice(0, 8).forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.lineTo(1000, 2200); g.lineTo(-10, 2200); g.closePath();
+    g.fillStyle = 'rgba(170,195,205,0.22)'; g.fill();
+    g.save(); g.clip(); g.fillStyle = 'rgba(255,255,255,0.14)';
+    for (const [x0, w0] of [[60, 80], [210, 30], [420, 110]]) { g.beginPath(); g.moveTo(x0 + 300, 100); g.lineTo(x0 + 300 + w0, 100); g.lineTo(x0 + w0 - 200, 1100); g.lineTo(x0 - 200, 1100); g.closePath(); g.fill(); }
+    g.restore();
+    g.beginPath(); WIN_OPEN.slice(0, 8).forEach(([x, y], i) => i ? g.lineTo(x, y + 4) : g.moveTo(x, y + 4));
+    g.lineWidth = 6; g.strokeStyle = 'rgba(40,40,40,0.5)'; g.stroke(); g.lineWidth = 2.5; g.strokeStyle = 'rgba(245,248,250,0.9)'; g.stroke();
+    g.restore();
+  }
+  if (turning) {
+    const P = [704, 1262], G0 = [644, 1448], th = k * 3 * Math.PI * 2;
+    const vx = G0[0] - P[0], vy = G0[1] - P[1];
+    const G = [P[0] + vx * Math.cos(th) - vy * Math.sin(th), P[1] + vx * Math.sin(th) + vy * Math.cos(th)];
+    // chrome crank arm (bevelled), hub cap, knob
+    const ang = Math.atan2(G[1] - P[1], G[0] - P[0]), len = Math.hypot(G[0] - P[0], G[1] - P[1]);
+    g.save(); g.translate(P[0], P[1]); g.rotate(ang);
+    g.beginPath(); g.roundRect(-30, -24, len + 30, 48, 22); g.fillStyle = '#2a2826'; g.fill();
+    const ag = g.createLinearGradient(0, -20, 0, 20); ag.addColorStop(0, '#f4f6f8'); ag.addColorStop(0.45, '#aeb4ba'); ag.addColorStop(1, '#5e646a');
+    g.beginPath(); g.roundRect(-26, -20, len + 22, 40, 18); g.fillStyle = ag; g.fill();
+    g.restore();
+    g.save(); g.translate(P[0], P[1]); g.rotate(ang); g.beginPath(); g.roundRect(-40, -30, 80, 60, 26); const hg = g.createLinearGradient(0, -30, 0, 30); hg.addColorStop(0, '#f6f8fa'); hg.addColorStop(0.5, '#b4bac0'); hg.addColorStop(1, '#6c737a'); g.fillStyle = hg; g.fill(); g.lineWidth = 3; g.strokeStyle = '#2a2826'; g.stroke(); g.restore();
+    g.beginPath(); g.arc(G[0], G[1], 34, 0, 7); const kg = g.createRadialGradient(G[0] - 9, G[1] - 9, 3, G[0], G[1], 34); kg.addColorStop(0, '#606064'); kg.addColorStop(1, '#1c1c1e'); g.fillStyle = kg; g.fill(); g.lineWidth = 2.5; g.strokeStyle = '#111'; g.stroke();
+    // forearm pivots at an off-screen elbow; rotate+scale so the grip stays on the knob
+    const E = [1250, 2300];
+    const a0 = Math.atan2(G0[1] - E[1], G0[0] - E[0]), a1 = Math.atan2(G[1] - E[1], G[0] - E[0]);
+    const sc = Math.hypot(G[0] - E[0], G[1] - E[1]) / Math.hypot(G0[0] - E[0], G0[1] - E[1]);
+    g.save(); g.translate(E[0], E[1]); g.rotate(a1 - a0); g.scale(sc, sc); g.translate(-E[0], -E[1]);
+    g.translate(G0[0], G0[1]); g.rotate(-(a1 - a0) * 0.6 + Math.sin(th) * 0.04); g.translate(-G0[0], -G0[1]);
+    g.drawImage(IMG.g_crank_hand, 0, 0, W + 700, H + 700); g.restore();
+  }
+  g.restore();
+  bigWord(g, 'KLİMA YOK', t, 39.55, 41.0, 300, { size: 104, fill: '#ff5a4a' });
+  kCaptions(g, t, 1820);
 };
 window.ready6 = gptLoad();
