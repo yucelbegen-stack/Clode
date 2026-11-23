@@ -3,7 +3,7 @@
 async function gptLoad() {
   await window.ready3;
   const L = [];
-  for (const n of ['g_goat', 'g_hen_brown', 'g_hen_white', 'g_hen_black', 'g_factory_in', 'g_factory_yard']) L.push(loadImg(n, `../assets/sprites/${n}.png`));
+  for (const n of ['g_goat', 'g_hen_brown', 'g_hen_white', 'g_hen_black', 'g_factory_in', 'g_factory_yard', 'g_mountain_road', 'g_plateau', 'g_village_road', 'g_mud']) L.push(loadImg(n, `../assets/sprites/${n}.png`));
   await Promise.all(L);
   return true;
 }
@@ -60,5 +60,65 @@ K.k2 = (g, t) => {
   }
   chip(g, 'BURSA · 1971', W / 2, 300, { size: 56, bg: '#1b1713', fill: '#ffd84a', border: '#ffd84a', ls: 3, k: 0.7 + 0.3 * easeOutBack(seg(lt, 0, 0.3)) });
   kCaptions(g, t, 1600);
+};
+
+function bgPan(g, img, lt, zoomRate = 0.006) { const z = 1 + lt * zoomRate; g.save(); g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2); g.drawImage(img, 0, 0, W, H); g.restore(); }
+// K1 0–3.5 mountain road (GPT) – white Toros A -> B, goat on the roof
+K.k1 = (g, t, noText) => {
+  const lt = t, ppm = 175, dist = MK1.pos(lt);
+  bgPan(g, IMG.g_mountain_road, lt, 0.004);
+  const x = 250 + dist * ppm * 0.55;
+  drawCar(g, { kind: 'station', color: 'white', x, gy: 1440, ppm, dist, v: 2.6, t, onBody: (gg, left, top, s) => {
+    goat(gg, left + 700 * s, top + 14 * s, ppm * 0.95, { t, bleat: Math.max(0, Math.sin(clamp((t - 0.35) / 0.9, 0, 1) * Math.PI)), dir: 1 });
+  } });
+  if (!noText) {
+    const kb = seg(t, 0.08, 0.3);
+    const tg = g.createLinearGradient(0, 220, 0, 760); tg.addColorStop(0, 'rgba(15,12,10,0)'); tg.addColorStop(0.25, `rgba(15,12,10,${0.45 * kb})`); tg.addColorStop(0.8, `rgba(15,12,10,${0.45 * kb})`); tg.addColorStop(1, 'rgba(15,12,10,0)');
+    g.fillStyle = tg; g.fillRect(0, 220, W, 540);
+    bigWord(g, 'BU ARABAYA NEDEN', t, 0.12, 3.5, 380, { size: 76, fill: '#fff', sw: 14 });
+    bigWord(g, 'DAĞ KEÇİSİ', t, 0.55, 3.5, 520, { size: 150, sw: 22, rot: -0.03 });
+    bigWord(g, 'DEDİLER?', t, 1.1, 3.5, 640, { size: 96, fill: '#fff', sw: 16 });
+  }
+  return dist;
+};
+// K4 12–17.5 plateau with the Taurus range (GPT) – white Toros A -> B, TOROS reveal
+K.k4 = (g, t, noBig) => {
+  const lt = t - 12, ppm = 165, d = MK4.pos(lt);
+  bgPan(g, IMG.g_plateau, lt, 0.004);
+  drawCar(g, { kind: 'station', color: 'white', x: -470 + d * ppm, gy: 1392, ppm, dist: d, v: 2.3, t });
+  const kt = noBig ? 0 : seg(lt, 2.3, 2.55);
+  if (kt > 0) {
+    g.save(); g.translate(W / 2, 560); const s2 = 1 + (1 - easeOut(kt)) * 1.8; g.scale(s2, s2); g.globalAlpha = kt;
+    g.font = '230px IBlack'; g.textAlign = 'center'; g.lineJoin = 'round';
+    g.lineWidth = 26; g.strokeStyle = '#111'; g.strokeText('TOROS', 0, 0); g.fillStyle = '#ffd84a'; g.fillText('TOROS', 0, 0);
+    g.restore();
+  }
+  kCaptions(g, t, 1600);
+  return d;
+};
+// K6 20.5–23.7 village lane (GPT) – green Toros comes down the lane toward the camera
+K.k6 = (g, t) => {
+  const lt = t - 20.5, HZ = 945, VX = 538;
+  bgPan(g, IMG.g_village_road, lt, 0.008);
+  const k = smooth(lt / 3.2), y = lerp(1010, 1640, k * k * 0.4 + k * 0.6);   // accelerating toward us
+  const roadW = 1060 * (y - HZ) / (1920 - HZ);
+  const x = VX + (y - HZ) * 0.02;
+  const dist = (y - 1010) / 60;
+  frontCar(g, IMG.front_green, x, y, roadW * 0.56, t, dist, { dust: true });
+  kCaptions(g, t, 1700);
+  return dist;
+};
+// K8 26.9–30.1 muddy field track (GPT) – white Toros A -> B through the mud, splashes
+K.k8 = (g, t) => {
+  const lt = t - 26.9, ppm = 170, d = MK8.pos(lt);
+  bgPan(g, IMG.g_mud, lt, 0.004);
+  const md = model('station'), s = ppm / md.m.pxPerM;
+  const car = drawCar(g, { kind: 'station', color: 'white', x: -460 + d * ppm, gy: 1430, ppm, dist: d, v: 2.9, t, bodyOver: KV.mud, bodyOverA: clamp(0.25 + lt / 2.2, 0, 1), noExhaust: true });
+  for (const wx of md.m.wheels.map(w => car.left + w[0] * s)) for (let i = 0; i < 22; i++) {
+    const ph = (lt * 2.4 + hash(i + wx)) % 1, px = wx - 40 - ph * 240 - hash(i * 2) * 60, py = 1415 - Math.sin(ph * Math.PI) * (70 + hash(i * 3) * 110);
+    g.fillStyle = `rgba(92,62,32,${0.9 * (1 - ph)})`; g.beginPath(); g.ellipse(px, py, 7 + hash(i) * 8, 5 + hash(i + 1) * 5, ph * 3, 0, 7); g.fill();
+  }
+  kCaptions(g, t, 1620);
+  return d;
 };
 window.ready6 = gptLoad();
