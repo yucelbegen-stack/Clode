@@ -285,8 +285,7 @@ K.k1 = (g, t, noText) => {
   // cliff drop
   const cg = g.createLinearGradient(0, 1320, 0, H); cg.addColorStop(0, '#9b8a73'); cg.addColorStop(1, '#6e604f');
   g.fillStyle = cg; g.fillRect(0, 1322, W, H - 1322);
-  g.strokeStyle = 'rgba(60,45,30,0.35)'; g.lineWidth = 3;
-  layer(g, camPx, 1, 140, (x, i) => { g.beginPath(); g.moveTo(x, 1340 + hash(i) * 40); g.lineTo(x + 70, 1420 + hash(i + 1) * 120); g.lineTo(x + 30, 1600 + hash(i + 2) * 200); g.stroke(); }, 12);
+  layer(g, camPx, 1, 230, (x, i) => { const y0 = 1360 + hash(i) * 260, r = 70 + hash(i + 1) * 60; rockMass(g, [[x - r, y0 + r * 0.6], [x - r * 0.6, y0 - r * 0.3], [x + r * 0.2, y0 - r * 0.5], [x + r, y0], [x + r * 0.7, y0 + r * 0.7]], '#9c8a70'); }, 12);
   drawCar(g, { kind: 'station', color: 'white', x: 540, gy: 1265, ppm, dist, v: 2.6, t, onBody: (gg, left, top, s) => {
     goat(gg, left + 700 * s, top + 12 * s, ppm * 0.95, { t, bleat: Math.max(0, Math.sin(clamp((t - 0.35) / 0.9, 0, 1) * Math.PI)), dir: 1 });
   } });
@@ -396,7 +395,7 @@ K.k4 = (g, t, noBig) => {
     g.lineWidth = 26; g.strokeStyle = '#111'; g.strokeText('TOROS', 0, 0); g.fillStyle = '#ffd84a'; g.fillText('TOROS', 0, 0);
     g.restore();
   }
-  const ka = noBig ? 0 : seg(lt, 3.4, 3.8);
+  const ka = 0; // mountain label removed
   if (ka > 0) {
     chip(g, 'TOROS DAĞLARI', 330, 780, { size: 40, bg: '#1b1713', fill: '#fff', border: '#fff', alpha: ka });
     g.save(); g.globalAlpha = ka; g.strokeStyle = '#fff'; g.lineWidth = 6; g.lineCap = 'round';
@@ -568,7 +567,7 @@ K.k10 = (g, t) => {
   sky(g, '#5d9fd6', '#a2cfeb', '#e8f0ee', 900);
   sun(g, 880, 260, 56);
   snowMountains(g, dist * ppm, 980, 0.05, 560, '#8b9ab4', 3.1);
-  g.fillStyle = '#86a35a'; g.fillRect(0, 975, W, H - 975);
+  grass(g, 0, 975);
   // slope: ground line through screen point (540,1300) with angle th, track moves along it
   const ox = 540, oy = 1300, cs = Math.cos(th), sn = Math.sin(th);
   g.save(); g.translate(ox, oy); g.rotate(-th);
@@ -577,7 +576,7 @@ K.k10 = (g, t) => {
   g.fillStyle = '#7d9a4e'; g.fillRect(-1400, -12, 2800, 14);
   g.fillStyle = '#b39b74'; g.fillRect(-1400, 0, 2800, 70);
   for (let i = -20; i < 20; i++) { const x = i * 90 - (camPx % 90); g.fillStyle = 'rgba(80,60,40,0.35)'; g.beginPath(); g.ellipse(x, 30 + hash(i + Math.floor(camPx / 90)) * 30, 10, 5, 0, 0, 7); g.fill(); }
-  for (let i = -8; i < 8; i++) { const x = i * 260 - ((camPx * 1.0) % 260); rockMass(g, [[x, 90], [x + 60, 60], [x + 130, 80], [x + 160, 140], [x + 20, 150]], '#8a7a62'); }
+  for (let i = -8; i < 8; i++) { const x = i * 260 - ((camPx * 1.0) % 260) + hash(i + Math.floor(camPx / 260)) * 60; rockMass(g, [[x, 140], [x + 20, 82], [x + 90, 66], [x + 150, 96], [x + 140, 150]], '#958368'); }
   drawCar(g, { kind: 'station', color: 'red', x: 0, gy: 0, ppm, dist, v: 2.2, t });
   g.restore();
   // foreground rock with goat

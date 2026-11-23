@@ -16,7 +16,7 @@ function pHouseLeft(g, X0, z0, z1, wallH, depth, wall = '#d9c7a3', roof = '#b458
   poly(g, [A, B, C, D]); g.fillStyle = shadeGrad(g, A[0], 0, B[0], 0, wall, 0.25); g.fill();
   // stone courses
   g.save(); poly(g, [A, B, C, D]); g.clip(); g.strokeStyle = 'rgba(34,28,22,0.28)'; g.lineWidth = 1;
-  for (let k = 0; k < 40; k++) { const zz = lerp(z0, z1, hash(k * 3.1 + X0)), yy = wallH * hash(k * 1.7 + z0); const [sx, sy] = P3(X0, yy, zz); const r = PV.f * 0.22 / zz; g.beginPath(); g.ellipse(sx, sy, r * 0.5, r * 0.9, 0, 0, 7); g.stroke(); }
+  for (let k = 0; k < 40; k++) { const zz = lerp(z0, z1, hash(k * 3.1 + X0)), yy = wallH * hash(k * 1.7 + z0); const [sx, sy] = P3(X0, yy, zz); const r = PV.f * 0.12 / zz; g.beginPath(); g.roundRect(sx - r * 0.25, sy - r * 0.35, r * 0.5, r * 0.7, r * 0.15); g.stroke(); }
   g.restore();
   poly(g, [A, B, C, D]); ink(g, 2.2);
   // window + shutters + flower box mid-wall
@@ -79,7 +79,7 @@ function pRoad(g, halfW, col, rutCol, verge) {
   // edge ink lines
   for (const X of [-halfW, halfW]) { const a = P3(X, 0, zN), b = P3(X, 0, zF); g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.lineWidth = 2.2; g.strokeStyle = 'rgba(34,28,22,0.55)'; g.stroke(); }
   // pebbles
-  for (let k = 0; k < 90; k++) { const z = 1.2 + Math.pow(hash(k), 2) * 40, X = (hash(k + 9) - 0.5) * halfW * 1.9; const [x, y] = P3(X, 0, z), r = PV.f * 0.05 / z; g.beginPath(); g.ellipse(x, y, r * 1.4, r * 0.7, 0, 0, 7); g.fillStyle = 'rgba(90,70,50,0.45)'; g.fill(); }
+  for (let k = 0; k < 90; k++) { const z = 1.2 + Math.pow(hash(k), 2) * 40, X = (hash(k + 9) - 0.5) * halfW * 1.9; const [x, y] = P3(X, 0, z), r = PV.f * 0.03 / z; g.beginPath(); g.ellipse(x, y, r * 1.4, r * 0.7, 0, 0, 7); g.fillStyle = 'rgba(120,95,65,0.5)'; g.fill(); g.beginPath(); g.ellipse(x - r * 0.3, y - r * 0.25, r * 0.6, r * 0.3, 0, 0, 7); g.fillStyle = 'rgba(255,245,225,0.5)'; g.fill(); }
 }
 
 // ---------------------------------------------------------------- K6 village lane, green Toros comes toward camera
