@@ -1,0 +1,5 @@
+out/parts/
+out/*.wav
+out/video_only.mp4
+out/list.txt
+__pycache__/
