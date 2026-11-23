@@ -1,7 +1,7 @@
 // Illustration style matched to the user's white-Toros reference: warm ink outlines (#3a2a1c), cross-hatched
 // shading, muted earthy palette, printed-paper texture. Overrides the flat-vector helpers of scene.js / keci.js.
 'use strict';
-const INK2 = '#3a2a1c';
+const INK2 = '#221d18';
 let HATCH = null, HATCH_L = null, PAPER = null;
 function makeHatch(sp, lw, col) {
   const c = document.createElement('canvas'); c.width = c.height = sp * 4;
@@ -11,8 +11,9 @@ function makeHatch(sp, lw, col) {
 }
 async function styleLoad() {
   await window.ready2;
-  HATCH = makeHatch(7, 1.5, 'rgba(58,42,28,0.42)');
-  HATCH_L = makeHatch(9, 1.1, 'rgba(58,42,28,0.22)');
+  // the Toros reference is cel-shaded with soft tonal shadows, not hatched
+  HATCH = 'rgba(34,28,22,0.13)';
+  HATCH_L = 'rgba(34,28,22,0.06)';
   await loadImg('paper', '../assets/sprites/paper.png');
   PAPER = IMG.paper;
   return true;
@@ -71,8 +72,8 @@ function drawRange(g, pts, baseY, col, snowLine, snow) {
     g.lineTo(W + 30, 0); g.closePath(); g.fillStyle = '#f4efe2'; g.fill();
   }
   // contour strokes on the flanks (engraving feel)
-  g.strokeStyle = 'rgba(58,42,28,0.35)'; g.lineWidth = 1.4;
-  for (let i = 3; i < pts.length - 3; i += 5) { const [x, y] = pts[i]; g.beginPath(); g.moveTo(x, y + 6); g.quadraticCurveTo(x + 18, y + 40, x + 8, y + 90); g.stroke(); }
+  g.strokeStyle = 'rgba(34,28,22,0.18)'; g.lineWidth = 1.2;
+  for (let i = 3; i < pts.length - 3; i += 9) { const [x, y] = pts[i]; g.beginPath(); g.moveTo(x, y + 6); g.quadraticCurveTo(x + 18, y + 40, x + 8, y + 90); g.stroke(); }
   g.restore();
   g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (const [x, y] of pts) g.lineTo(x, y); ink(g, 2.6);
 }

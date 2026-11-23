@@ -853,7 +853,7 @@ function frontCar(g, img, x, gy, wpx, t, distM, o = {}) {
     const x0 = x - wpx / 2 + a0 * s, tw = (a1 - a0) * s, y0 = top + 760 * s, th = (img.height - 760) * s;
     g.save(); g.beginPath(); g.rect(x0, y0, tw, th); g.clip();
     const per = 22 * s, off = ((distM / 0.30) * 0.30 * 160 * s) % per;
-    g.strokeStyle = 'rgba(10,8,6,0.55)'; g.lineWidth = 6 * s;
+    g.strokeStyle = 'rgba(10,8,6,0.35)'; g.lineWidth = 5 * s;
     for (let yy = y0 - per + off; yy < y0 + th + per; yy += per) { g.beginPath(); g.moveTo(x0, yy); g.lineTo(x0 + tw, yy); g.stroke(); }
     if (o.chains) { g.strokeStyle = '#d5d8de'; g.lineWidth = 5 * s; for (let yy = y0 - per * 2 + off * 2 % (per * 2); yy < y0 + th + per; yy += per * 2) { g.beginPath(); g.moveTo(x0, yy); g.lineTo(x0 + tw, yy + 10 * s); g.stroke(); } g.strokeStyle = '#3b3d42'; g.lineWidth = 3 * s; g.beginPath(); g.moveTo(x0 + tw / 2, y0); g.lineTo(x0 + tw / 2, y0 + th); g.stroke(); }
     g.restore();
@@ -1021,7 +1021,7 @@ function kRender(t) {
     finish(g, t, 0.38);
     g.restore(); return;
   }
-  window.__PHOTO_SCENE = ['k6', 'k9', 'k11', 'k12', 'k13', 'k17'].includes(sc[2]);
+  window.__PHOTO_SCENE = ['k11', 'k12', 'k17'].includes(sc[2]);
   dist = K[sc[2]](g, t) || 0;
   const odoA = ROAD.has(sc[2]) ? clamp(Math.min(t - sc[0], sc[1] - t) / 0.2, 0, 1) : 0;
   odometer(g, t, dist, odoA);
